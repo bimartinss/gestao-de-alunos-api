@@ -34,7 +34,18 @@ jobs:
       - name: Instalar dependências
         run: npm ci
 
-      - name: Executar testes
-        run: npm test
+      - name: Executar testes e gerar relatório JSON
+        run: |
+          mkdir -p reports
+          npm test -- --reporter json > reports/test-results.json
         env:
           MONGODB_URI: mongodb://127.0.0.1:27017/gestao-de-alunos-test
+
+      - name: Publicar relatório dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-test-report
+          path: reports/test-results.json
+          if-no-files-found: warn
+          retention-days: 14
